@@ -17,7 +17,7 @@ pipeline {
                     def image_name = "projetoapi:lts"
                     def container_name = "projetoapi"
 
-                    // Remove o contêiner se existir
+                    sh "chmod +x install.sh"
                     sh "./install.sh"
                 }
             }
