@@ -14,7 +14,7 @@ pipeline {
             steps {
                 script {
                     sh "sudo chmod +x ./install.sh"
-                    sh "./install.sh
+                    sh "./install.sh"
                 }
             }
         }
