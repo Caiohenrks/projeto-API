@@ -5,6 +5,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 script {
+                    // Realiza o checkout do repositório
                     checkout scm
                 }
             }
@@ -16,30 +17,17 @@ pipeline {
                     def image_name = "projetoapi:lts"
                     def container_name = "projetoapi"
 
-                    docker.withServer('docker-server') {
-                        def existingContainer = docker.container(container_name)
-                        if (existingContainer) {
-                            echo "Removendo contêiner existente: $container_name"
-                            existingContainer.stop()
-                            existingContainer.remove()
-                        }
-                    }
+                    // Remove o contêiner se existir
+                    sh "docker ps -a | grep $container_name && docker stop $container_name && docker rm $container_name"
 
-                    docker.withServer('docker-server') {
-                        def existingImage = docker.image(image_name)
-                        if (existingImage) {
-                            echo "Removendo imagem existente: $image_name"
-                            existingImage.remove()
-                        }
-                    }
+                    // Remove a imagem se existir
+                    sh "docker images | grep $image_name && docker rmi $image_name"
 
                     echo "Construindo imagem: $image_name"
-                    docker.build(image_name, '.')
+                    sh "docker build -t $image_name ."
 
                     echo "Iniciando contêiner: $container_name"
-                    docker.withServer('docker-server') {
-                        def newContainer = docker.image(image_name).run("-d --name $container_name -p 80:80")
-                    }
+                    sh "docker run -d --name $container_name -p 80:80 $image_name"
                 }
             }
         }
