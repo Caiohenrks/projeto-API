@@ -5,7 +5,6 @@ pipeline {
         stage('Checkout') {
             steps {
                 script {
-                    // Realiza o checkout do repositório
                     checkout scm
                 }
             }
@@ -17,24 +16,30 @@ pipeline {
                     def image_name = "projetoapi:lts"
                     def container_name = "projetoapi"
 
-                    // Remove o contêiner se existir
-                    if (docker.containerExists(container_name)) {
-                        echo "Removendo contêiner existente: $container_name"
-                        docker.stop(container_name)
-                        docker.remove(container_name)
+                    docker.withServer('docker-server') {
+                        def existingContainer = docker.container(container_name)
+                        if (existingContainer) {
+                            echo "Removendo contêiner existente: $container_name"
+                            existingContainer.stop()
+                            existingContainer.remove()
+                        }
                     }
 
-                    // Remove a imagem se existir
-                    if (docker.imageExists(image_name)) {
-                        echo "Removendo imagem existente: $image_name"
-                        docker.imageRemove(image_name)
+                    docker.withServer('docker-server') {
+                        def existingImage = docker.image(image_name)
+                        if (existingImage) {
+                            echo "Removendo imagem existente: $image_name"
+                            existingImage.remove()
+                        }
                     }
 
                     echo "Construindo imagem: $image_name"
-                    docker.build("-t $image_name .")
+                    docker.build(image_name, '.')
 
                     echo "Iniciando contêiner: $container_name"
-                    docker.run("-d --name $container_name -p 80:80 $image_name")
+                    docker.withServer('docker-server') {
+                        def newContainer = docker.image(image_name).run("-d --name $container_name -p 80:80")
+                    }
                 }
             }
         }
