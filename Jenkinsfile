@@ -16,33 +16,32 @@ pipeline {
                     def image_name = 'projetoapi:lts'
                     def container_name = 'projetoapi'
 
-                    if (docker.image(image_name).inspect().status == 'created' || docker.image(image_name).inspect().status == 'exited') {
-                        echo "Removendo imagem existente: $image_name"
-                        docker.image(image_name).remove(force: true)
-                    }
+                    // Parar e remover o contêiner existente
+                    sh "docker stop $container_name || true"
+                    sh "docker rm $container_name || true"
 
-                    if (docker.container(container_name).inspect().status == 'running') {
-                        echo "Parando e removendo contêiner existente: $container_name"
-                        docker.container(container_name).stop()
-                        docker.container(container_name).remove(force: true)
-                    }
+                    // Remover a imagem existente
+                    sh "docker rmi $image_name || true"
                 }
             }
         }
 
         stage('Construir Imagem') {
             steps {
-                echo "Construindo imagem: $image_name"
-                sh 'docker build -t projetoapi:lts .'
+                script {
+                    echo "Construindo imagem: $image_name"
+                    sh 'docker build -t projetoapi:lts .'
+                }
             }
         }
 
         stage('Iniciar Contêiner') {
             steps {
-                echo "Iniciando contêiner: $container_name"
-                sh 'docker run -d --name projetoapi -p 80:80 projetoapi:lts'
+                script {
+                    echo "Iniciando contêiner: $container_name"
+                    sh 'docker run -d --name projetoapi -p 80:80 projetoapi:lts'
+                }
             }
         }
     }
 }
-
