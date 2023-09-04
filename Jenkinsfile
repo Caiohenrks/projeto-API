@@ -17,11 +17,11 @@ pipeline {
                     def container_name = 'projetoapi'
 
                     // Parar e remover o contêiner existente
-                    sh "docker stop $container_name || true"
-                    sh "docker rm $container_name || true"
+                    sh "sudo docker stop $container_name || true"
+                    sh "sudo docker rm $container_name || true"
 
                     // Remover a imagem existente
-                    sh "docker rmi $image_name || true"
+                    sh "sudo docker rmi $image_name || true"
                 }
             }
         }
@@ -30,7 +30,7 @@ pipeline {
             steps {
                 script {
                     echo "Construindo imagem: $image_name"
-                    sh 'docker build -t projetoapi:lts .'
+                    sh 'sudo docker build -t projetoapi:lts .'
                 }
             }
         }
@@ -39,7 +39,7 @@ pipeline {
             steps {
                 script {
                     echo "Iniciando contêiner: $container_name"
-                    sh 'docker run -d --name projetoapi -p 80:80 projetoapi:lts'
+                    sh 'sudo docker run -d --name projetoapi -p 80:80 projetoapi:lts'
                 }
             }
         }
