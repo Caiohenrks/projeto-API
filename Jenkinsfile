@@ -10,28 +10,39 @@ pipeline {
                 }
             }
         }
-
-        stage('Build and Run Docker Image') {
+        stage('Limpar Contêiner e Imagem Existente') {
             steps {
                 script {
-                    def image_name = "projetoapi:lts"
-                    def container_name = "projetoapi"
-                    sh "sudo ls -la"
-                    sh "sudo docker ps -a"
-                    
-                    // Remove o contêiner se existir
-                    sh "sudo docker ps -a | grep $container_name && sudo docker stop $container_name && sudo docker rm $container_name"
+                    def image_name = 'projetoapi:lts'
+                    def container_name = 'projetoapi'
 
-                    // Remove a imagem se existir
-                    sh "sudo docker images | grep $image_name && sudo docker rmi $image_name"
+                    if (docker.image(image_name).inspect().status == 'created' || docker.image(image_name).inspect().status == 'exited') {
+                        echo "Removendo imagem existente: $image_name"
+                        docker.image(image_name).remove(force: true)
+                    }
 
-                    echo "Construindo imagem: $image_name"
-                    sh "sudo docker build -t $image_name ."
-
-                    echo "Iniciando contêiner: $container_name"
-                    sh "sudo docker run -d --name $container_name -p 80:80 $image_name"
+                    if (docker.container(container_name).inspect().status == 'running') {
+                        echo "Parando e removendo contêiner existente: $container_name"
+                        docker.container(container_name).stop()
+                        docker.container(container_name).remove(force: true)
+                    }
                 }
+            }
+        }
+
+        stage('Construir Imagem') {
+            steps {
+                echo "Construindo imagem: $image_name"
+                sh 'docker build -t projetoapi:lts .'
+            }
+        }
+
+        stage('Iniciar Contêiner') {
+            steps {
+                echo "Iniciando contêiner: $container_name"
+                sh 'docker run -d --name projetoapi -p 80:80 projetoapi:lts'
             }
         }
     }
 }
+
