@@ -18,10 +18,10 @@ pipeline {
                     def container_name = "projetoapi"
 
                     // Remove o contêiner se existir
-                    sh "sudo docker ps -a | grep $container_name && docker stop $container_name && docker rm $container_name"
+                    sh "sudo docker ps -a | grep $container_name && sudo docker stop $container_name && sudo docker rm $container_name"
 
                     // Remove a imagem se existir
-                    sh "sudo docker images | grep $image_name && docker rmi $image_name"
+                    sh "sudo docker images | grep $image_name && sudo docker rmi $image_name"
 
                     echo "Construindo imagem: $image_name"
                     sh "sudo docker build -t $image_name ."
