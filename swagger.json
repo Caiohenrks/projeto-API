@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "ATE - Alan Turing Engine v1",
-    "description": "API for mathematical calculations",
+    "description": "API for mathematical calculations.",
     "version": "1.0.0"
   },
   "paths": {
